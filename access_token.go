@@ -1,48 +1,26 @@
 package orange_money_apis
 
-import (
-    "github.com/go-playground/validator/v10"
- "fmt"
-"net/http"
-)
+// Makes a request to generate a newaccessToken.
+func requestNewAccesToken(key, secret, endPoint string) (accessToken string, requestError error) {
+	tokenPath := utils.join(endPoint, "/token")
 
-type GenerateAccessTokenParams struct {
-	key    string `validate:"required"`
-	secret string `validate:"required"`
-    endPoint string `validate:"required,datauri"`
-	logger   *DebugLogger
-}
+	basicKey := utils.hash(key, secret)
 
-
-func generateAccesToken(config GenerateAccessTokenParams) (accessToken *string, requestError error) {
-	validate := validator.New()
-	validationError := validate.Struct(config)
-
-	if validate.Struct(config) != nil {
-		validationErrors, _ := validationError.(validator.ValidationErrors)
-		return nil, &validationErrors
+	header := map[string][]string{
+		"Authorization": {utils.join("Basic ", basicKey)},
 	}
-   
-    tokenPath := fmt.Sprint(config.endPoint, "/token")
-    
-    req, requestError := http.NewRequest("POST", tokenPath, nil)
-    
-    if requestError == nil {
-        return nil, requestError
-    }
 
-    req.PostForm.Add("grant_type", "client_credentials")
-    basicKey := hash(config.key, config.secret)
-    req.Header.Add("Authorization", fmt.Sprintf("Basic %s", basicKey)) 
-    
-    httpClient := &http.Client{}
-    response, postError := httpClient.Do(req)
-    
-    if postError != nil {
-        return nil, postError
-    }
+	body := []byte("grant_type=client_credentials")
 
-    defer response.Body.Close()
-    
+	res, requestError := request.post(tokenPath, body, header)
+
+	if requestError != nil {
+		return "", requestError
+	}
+
+	if res.status != 200 && res.status != 201 {
+		return "", utils.newError("Backend failed to generate the access Token with message:", res.asText())
+	}
+
+	return res.asText(), nil
 }
- 
