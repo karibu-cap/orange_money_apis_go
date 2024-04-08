@@ -25,7 +25,7 @@ type InitializeCashInParams struct {
 }
 
 type CashIn struct {
-	config CashInParams
+	Config CashInParams
 }
 
 type _PayTokenRes struct {
@@ -68,20 +68,20 @@ const (
 )
 
 func (this *CashIn) getApiLocation() string {
-	if this.config.IsProd {
+	if this.Config.IsProd {
 		return apiLocationProd
 	}
 	return apiLocationDev
 }
 
 func (this *CashIn) requestNewPayToken() (payToken string, error error) {
-	accessToken, tokenError := requestNewAccesToken(this.config.CustomerKey, this.config.CustomerSecret, this.getApiLocation())
+	accessToken, tokenError := requestNewAccesToken(this.Config.CustomerKey, this.Config.CustomerSecret, this.getApiLocation())
 	if tokenError != nil {
 		return "", tokenError
 	}
 
 	header := map[string][]string{
-		"X-AUTH-TOKEN":  {this.config.XAuthToken},
+		"X-AUTH-TOKEN":  {this.Config.XAuthToken},
 		"Authorization": {utils.join("Bearer ", accessToken)},
 	}
 
@@ -126,13 +126,13 @@ func (this *CashIn) RequestNewCashIn(config InitializeCashInParams) (*NewCashInR
 		return nil, payTokenResError
 	}
 
-	accessToken, accessTokenError := requestNewAccesToken(this.config.CustomerKey, this.config.CustomerSecret, this.getApiLocation())
+	accessToken, accessTokenError := requestNewAccesToken(this.Config.CustomerKey, this.Config.CustomerSecret, this.getApiLocation())
 	if accessTokenError != nil {
 		return nil, accessTokenError
 	}
 
 	header := map[string][]string{
-		"X-AUTH-TOKEN":  {this.config.XAuthToken},
+		"X-AUTH-TOKEN":  {this.Config.XAuthToken},
 		"Authorization": {utils.join("Bearer ", accessToken)},
 		"Content-Type":  {"application/json"},
 	}
@@ -143,9 +143,9 @@ func (this *CashIn) RequestNewCashIn(config InitializeCashInParams) (*NewCashInR
 		"orderId":           config.referenceId,
 		"description":       config.comment,
 		"amount":            utils.join(config.amount),
-		"channelUserMsisdn": this.config.MerchantNumber,
+		"channelUserMsisdn": this.Config.MerchantNumber,
 		"payToken":          payToken,
-		"pin":               this.config.Pin,
+		"pin":               this.Config.Pin,
 	}
 
 	serializedBody, serializationError := json.Marshal(body)
@@ -186,13 +186,13 @@ func (this *CashIn) RequestNewCashIn(config InitializeCashInParams) (*NewCashInR
 }
 
 func (this *CashIn) FetchCashInStatus(payToken string) (*NewCashInRes, error) {
-	accessToken, accessTokenError := requestNewAccesToken(this.config.CustomerKey, this.config.CustomerSecret, this.getApiLocation())
+	accessToken, accessTokenError := requestNewAccesToken(this.Config.CustomerKey, this.Config.CustomerSecret, this.getApiLocation())
 	if accessTokenError != nil {
 		return nil, accessTokenError
 	}
 
 	header := map[string][]string{
-		"X-AUTH-TOKEN":  {this.config.XAuthToken},
+		"X-AUTH-TOKEN":  {this.Config.XAuthToken},
 		"Authorization": {utils.join("Bearer ", accessToken)},
 	}
 
@@ -237,5 +237,5 @@ func New(config CashInParams) (*CashIn, *validator.ValidationErrors) {
 		return nil, &validationErrors
 	}
 
-	return &CashIn{config: config}, nil
+	return &CashIn{Config: config}, nil
 }
