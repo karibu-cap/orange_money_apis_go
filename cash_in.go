@@ -14,7 +14,7 @@ type CashInParams struct {
 	MerchantNumber string `validate:"required"`
 	Pin            string `validate:"required"`
 	IsProd         bool
-	Logger         *DebugLogger
+	Logger         DebugLogger
 }
 
 type InitializeCashInParams struct {
