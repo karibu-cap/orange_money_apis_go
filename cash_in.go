@@ -2,8 +2,6 @@ package orange_money_apis
 
 import (
 	"encoding/json"
-	"regexp"
-
 	"github.com/go-playground/validator/v10"
 )
 
@@ -11,17 +9,17 @@ type CashInParams struct {
 	CustomerKey    string `validate:"required"`
 	CustomerSecret string `validate:"required"`
 	XAuthToken     string `validate:"required"`
-	MerchantNumber string `validate:"required"`
+	MerchantNumber string `validate:"required,ynoteMerchantNumber"`
 	Pin            string `validate:"required"`
 	IsProd         bool
 	Logger         DebugLogger
 }
 
 type InitializeCashInParams struct {
-	notificationUrl      string `validate:"required,datauri"`
-	amount               uint32 `validate:"required"` // todo: check if 0 is valid.
-	referenceId, comment string `validate:"required"`
-	buyerAccountPhone    string `validate:"required,omNumber"`
+	NotificationUrl      string `validate:"required,datauri"`
+	Amount               uint32 `validate:"required"` // todo: check if 0 is valid.
+	ReferenceId, comment string `validate:"required"`
+	BuyerAccountPhone    string `validate:"required,omNumber"`
 }
 
 type CashIn struct {
@@ -114,7 +112,8 @@ func (this *CashIn) requestNewPayToken() (payToken string, error error) {
 
 func (this *CashIn) RequestNewCashIn(config InitializeCashInParams) (*NewCashInRes, error) {
 	validate := validator.New()
-	validate.RegisterValidation("omNumber", isValidNumber)
+	validate.RegisterValidation("omNumber", isOmNumber)
+	validate.RegisterValidation("ynoteMerchantNumber", isYnoteMerchantNumber)
 
 	err := validate.Struct(config)
 	if err != nil {
@@ -138,11 +137,11 @@ func (this *CashIn) RequestNewCashIn(config InitializeCashInParams) (*NewCashInR
 	}
 
 	body := map[string]string{
-		"subscriberMsisdn":  config.buyerAccountPhone,
-		"notifUrl":          config.notificationUrl,
-		"orderId":           config.referenceId,
+		"subscriberMsisdn":  config.BuyerAccountPhone,
+		"notifUrl":          config.NotificationUrl,
+		"orderId":           config.ReferenceId,
 		"description":       config.comment,
-		"amount":            utils.join(config.amount),
+		"amount":            utils.join(config.Amount),
 		"channelUserMsisdn": this.Config.MerchantNumber,
 		"payToken":          payToken,
 		"pin":               this.Config.Pin,

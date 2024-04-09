@@ -24,7 +24,12 @@ type RequestNewRefundParams struct {
 	CustomerAccountPhone             string `validate:"required,omNumber"`
 }
 
-type YNoteRefundApi struct {
+type YNoteRefundApi interface {
+	RequestNewRefund(config RequestNewRefundParams) (*RequestNewRefundRes, error)
+	FetchRefundStatus(messageId string) (*FetchRefundStatusRes, error)
+}
+
+type _YNoteRefundApi struct {
 	config YNoteRefundApiConfig
 }
 
@@ -80,14 +85,14 @@ const (
 	InitializingTransfer        = '1'
 )
 
-func (this *YNoteRefundApi) getApiEnv() string {
+func (this *_YNoteRefundApi) getApiEnv() string {
 	if this.config.IsProd {
 		return "prod"
 	}
 	return "dev"
 }
 
-func (this *YNoteRefundApi) RequestNewRefund(config RequestNewRefundParams) (*RequestNewRefundRes, error) {
+func (this *_YNoteRefundApi) RequestNewRefund(config RequestNewRefundParams) (*RequestNewRefundRes, error) {
 	validate := validator.New()
 	validate.RegisterValidation("omNumber", isOmNumber)
 
@@ -154,7 +159,7 @@ func (this *YNoteRefundApi) RequestNewRefund(config RequestNewRefundParams) (*Re
 	}, nil
 }
 
-func (this *YNoteRefundApi) FetchRefundStatus(messageId string) (*FetchRefundStatusRes, error) {
+func (this *_YNoteRefundApi) FetchRefundStatus(messageId string) (*FetchRefundStatusRes, error) {
 	accessToken, accessTokenError := requestNewAccesToken(this.config.ClientId, this.config.ClientSecret, yNoteApiTokenHost)
 	if accessTokenError != nil {
 		return nil, accessTokenError
@@ -196,9 +201,9 @@ func (this *YNoteRefundApi) FetchRefundStatus(messageId string) (*FetchRefundSta
 	}, nil
 }
 
-func NewYNoteRefund(config YNoteRefundApiConfig) (*YNoteRefundApi, *validator.ValidationErrors) {
+func NewYNoteRefund(config YNoteRefundApiConfig) (YNoteRefundApi, *validator.ValidationErrors) {
 	validate := validator.New()
-	validate.RegisterValidation("ynoteMerchantNumber", isyNoteMerchantNumber)
+	validate.RegisterValidation("ynoteMerchantNumber", isYnoteMerchantNumber)
 
 	err := validate.Struct(config)
 	if err != nil {
@@ -206,5 +211,5 @@ func NewYNoteRefund(config YNoteRefundApiConfig) (*YNoteRefundApi, *validator.Va
 		return nil, &validationErrors
 	}
 
-	return &YNoteRefundApi{config: config}, nil
+	return &_YNoteRefundApi{config: config}, nil
 }

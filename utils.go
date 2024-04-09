@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type u struct{}
@@ -22,11 +23,17 @@ func (*u) hash(key, secret string) string {
 }
 
 func (*u) join(a ...any) string {
-	return fmt.Sprint(a)
+	var strs []string = make([]string, 0, len(a))
+
+	for id, val := range a {
+		strs[id] = fmt.Sprintf("%v", val)
+	}
+
+	return strings.Join(strs, "")
 }
 
 func (*u) newError(a ...any) error {
-	return errors.New(fmt.Sprint(a))
+	return errors.New(fmt.Sprint(a...))
 }
 
 func getStatusFromProviderRawStatus(rawStatus string) int8 {

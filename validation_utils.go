@@ -20,7 +20,7 @@ func isOmNumber(fl validator.FieldLevel) bool {
 	return haveMatch
 }
 
-func isyNoteMerchantNumber(fl validator.FieldLevel) bool {
+func isYnoteMerchantNumber(fl validator.FieldLevel) bool {
 	value := fl.Field().Interface().(string)
 
 	haveMatch, _ := regexp.MatchString(yNoteMerchantNumber, value)
