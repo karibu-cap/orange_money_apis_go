@@ -34,6 +34,7 @@ type _PayTokenRes struct {
 }
 
 type _CashInRes struct {
+	json    interface{}
 	Message string `json:"message"`
 	Data    struct {
 		Id                int    `json:"id"`
@@ -55,7 +56,7 @@ type _CashInRes struct {
 }
 
 type NewCashInRes struct {
-	Raw      _CashInRes
+	Raw      string
 	Status   int8
 	PayToken string
 }
@@ -180,7 +181,7 @@ func (this *CashIn) RequestNewCashIn(config InitializeCashInParams) (*NewCashInR
 	return &NewCashInRes{
 		Status:   getStatusFromProviderRawStatus(parsedResponse.Data.Status),
 		PayToken: payToken,
-		Raw:      parsedResponse,
+		Raw:      response.asText(),
 	}, nil
 }
 
@@ -223,7 +224,7 @@ func (this *CashIn) FetchCashInStatus(payToken string) (*NewCashInRes, error) {
 	return &NewCashInRes{
 		Status:   getStatusFromProviderRawStatus(parsedResponse.Data.Status),
 		PayToken: payToken,
-		Raw:      parsedResponse,
+		Raw:      response.asText(),
 	}, nil
 }
 
