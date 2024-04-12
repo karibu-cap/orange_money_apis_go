@@ -23,7 +23,7 @@ func (*u) hash(key, secret string) string {
 }
 
 func (*u) join(a ...any) string {
-	var strs []string = make([]string, 0, len(a))
+	var strs []string = make([]string, len(a), len(a))
 
 	for id, val := range a {
 		strs[id] = fmt.Sprintf("%v", val)
