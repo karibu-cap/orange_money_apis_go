@@ -16,7 +16,7 @@ type CashInParams struct {
 }
 
 type InitializeCashInParams struct {
-	NotificationUrl      string `validate:"required,datauri"`
+	NotificationUrl      string `validate:"required,http_url"`
 	Amount               uint32 `validate:"required"` // todo: check if 0 is valid.
 	ReferenceId, comment string `validate:"required"`
 	BuyerAccountPhone    string `validate:"required,omNumber"`
