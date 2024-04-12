@@ -111,7 +111,7 @@ func (this *CashIn) requestNewPayToken() (payToken string, error error) {
 	return parsedResponse.Data.PayToken, nil
 }
 
-func (this *CashIn) RequestNewCashIn(config InitializeCashInParams) (*NewCashInRes, error) {
+func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashInRes, error) {
 	validate := validator.New()
 	validate.RegisterValidation("omNumber", isOmNumber)
 	validate.RegisterValidation("ynoteMerchantNumber", isYnoteMerchantNumber)
