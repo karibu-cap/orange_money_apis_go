@@ -186,7 +186,8 @@ func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashIn
 			"reqBody":   body,
 		})
 	}
-	this.Config.Logger.Debug(fmt.Sprintf("%s:payment_request_end_with_data", loggingID), response.asText()),
+
+	this.Config.Logger.Debug(fmt.Sprintf("%s:payment_request_end_with_data", loggingID), response.asText())
 
 	var parsedResponse _CashInRes
 	resUnwrapError := response.asJson(&parsedResponse)
