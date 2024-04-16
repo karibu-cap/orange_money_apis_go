@@ -2,6 +2,7 @@ package orange_money_apis
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -75,6 +76,8 @@ func (this *CashIn) getApiLocation() string {
 }
 
 func (this *CashIn) requestNewPayToken() (payToken string, error error) {
+	const loggingID = "requestNewPayToken"
+
 	accessToken, tokenError := requestNewAccesToken(this.Config.CustomerKey, this.Config.CustomerSecret, this.getApiLocation())
 	if tokenError != nil {
 		return "", tokenError
@@ -85,6 +88,10 @@ func (this *CashIn) requestNewPayToken() (payToken string, error error) {
 		"Authorization": {utils.join("Bearer ", accessToken)},
 	}
 
+	this.Config.Logger.Debug(
+		fmt.Sprintf("%s:start", loggingID),
+		map[string]any{"message": "Initializing payment(generating pay token)"},
+	)
 	endPoint := utils.join(this.getApiLocation(), "/omcoreapis/1.0.2/mp/init")
 
 	response, reqError := request.post(endPoint, nil, header)
@@ -113,6 +120,9 @@ func (this *CashIn) requestNewPayToken() (payToken string, error error) {
 }
 
 func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashInRes, error) {
+	const loggingID = "CashIn.RequestNewCashIn"
+	this.Config.Logger.Debug(fmt.Sprintf("%s:start", loggingID), nil)
+
 	validate := validator.New()
 	validate.RegisterValidation("omNumber", isOmNumber)
 	validate.RegisterValidation("ynoteMerchantNumber", isYnoteMerchantNumber)
@@ -155,6 +165,10 @@ func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashIn
 		return nil, serializationError
 	}
 
+	this.Config.Logger.Debug(
+		fmt.Sprintf("%s:requesting payment", loggingID),
+		map[string]any{"header": header, "body": body},
+	)
 	endPoint := utils.join(this.getApiLocation(), "/omcoreapis/1.0.2/mp/pay")
 
 	response, requestError := request.post(endPoint, serializedBody, header)
@@ -172,6 +186,7 @@ func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashIn
 			"reqBody":   body,
 		})
 	}
+	this.Config.Logger.Debug(fmt.Sprintf("%s:payment_request_end_with_data", loggingID), response.asText()),
 
 	var parsedResponse _CashInRes
 	resUnwrapError := response.asJson(&parsedResponse)
