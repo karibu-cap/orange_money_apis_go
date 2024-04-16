@@ -2,6 +2,7 @@ package orange_money_apis
 
 import (
 	"encoding/json"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -173,7 +174,7 @@ func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashIn
 	}
 
 	var parsedResponse _CashInRes
-	resUnwrapError := response.asJson(parsedResponse)
+	resUnwrapError := response.asJson(&parsedResponse)
 	if resUnwrapError != nil {
 		return nil, resUnwrapError
 	}
