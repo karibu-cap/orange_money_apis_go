@@ -18,10 +18,11 @@ type CashInParams struct {
 }
 
 type InitializeCashInParams struct {
-	NotificationUrl      string `validate:"required,http_url"`
-	Amount               uint32 `validate:"required"` // todo: check if 0 is valid.
-	ReferenceId, comment string `validate:"required"`
-	BuyerAccountPhone    string `validate:"required,omNumber"`
+	NotificationUrl   string `validate:"required,http_url"`
+	Amount            uint32 `validate:"required"` // todo: check if 0 is valid.
+	ReferenceId       string `validate:"required"`
+	Comment           string `validate:"required"`
+	BuyerAccountPhone string `validate:"required,omNumber"`
 }
 
 type CashIn struct {
@@ -158,7 +159,7 @@ func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashIn
 		"subscriberMsisdn":  config.BuyerAccountPhone,
 		"notifUrl":          config.NotificationUrl,
 		"orderId":           config.ReferenceId,
-		"description":       config.comment,
+		"description":       config.Comment,
 		"amount":            utils.join(config.Amount),
 		"channelUserMsisdn": this.Config.MerchantNumber,
 		"payToken":          payToken,
