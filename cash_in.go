@@ -88,16 +88,22 @@ func (this *CashIn) requestNewPayToken() (payToken string, error error) {
 		"Authorization": {utils.join("Bearer ", accessToken)},
 	}
 
-	this.Config.Logger.Debug(
-		fmt.Sprintf("%s:start", loggingID),
-		map[string]any{"message": "Initializing payment(generating pay token)"},
-	)
 	endPoint := utils.join(this.getApiLocation(), "/omcoreapis/1.0.2/mp/init")
 
 	response, reqError := request.post(endPoint, nil, header)
 	if reqError != nil {
 		return "", reqError
 	}
+
+	this.Config.Logger.Debug(
+		fmt.Sprintf("%s:start", loggingID),
+		map[string]any{
+			"response": response,
+			"message":  "Initializing payment(generating pay token)",
+			"endPoint": endPoint,
+			"header":   header,
+		},
+	)
 
 	if response.status != 200 && response.status != 201 {
 		return "", utils.newError(map[string]any{
@@ -165,11 +171,12 @@ func (this *CashIn) RequestNewCashIn(config *InitializeCashInParams) (*NewCashIn
 		return nil, serializationError
 	}
 
+	endPoint := utils.join(this.getApiLocation(), "/omcoreapis/1.0.2/mp/pay")
+
 	this.Config.Logger.Debug(
 		fmt.Sprintf("%s:requesting payment", loggingID),
-		map[string]any{"header": header, "body": body},
+		map[string]any{"header": header, "body": string(serializedBody), "url": endPoint},
 	)
-	endPoint := utils.join(this.getApiLocation(), "/omcoreapis/1.0.2/mp/pay")
 
 	response, requestError := request.post(endPoint, serializedBody, header)
 
